@@ -6,6 +6,8 @@ import pandas as pd
 from scipy.spatial import cKDTree 
 from MAPS.loss import chamfer_distance_torch
 from MAPS.loss import chamfer_distance_torch_bidirectional
+from MAPS.utils import set_seed
+
 
 
 
@@ -62,7 +64,7 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
     3. Apply rotation.
     4. Translate back to the original centroid plus the estimated translation.
     """
-    
+    set_seed(7)
     source_t = torch.tensor(source, dtype=torch.float32, device=device).unsqueeze(0)
     target_t = torch.tensor(target, dtype=torch.float32, device=device).unsqueeze(0)
     
@@ -74,14 +76,14 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
     mean_dist_t = torch.norm(target_t - t_center, dim=2).mean()
     init_scale_val = (mean_dist_t / mean_dist_s).item() if mean_dist_s > 0 else 1.0
 
-    candidate_angles = np.linspace(0, 2 * np.pi, 180, endpoint=False)
+    candidate_angles = np.linspace(0, 2 * np.pi, 360, endpoint=False)
     best_init_theta = 0.0
     min_coarse_loss = float('inf')
     
     print("Scanning angles to find best starting angle...")
     with torch.no_grad():
-        idx_s_c = torch.randperm(s_centered.shape[1], device=device)[:10000]
-        idx_t_c = torch.randperm(target_t.shape[1], device=device)[:10000]
+        idx_s_c = torch.randperm(s_centered.shape[1], device=device)[:sample_size]
+        idx_t_c = torch.randperm(target_t.shape[1], device=device)[:sample_size]
         
         for ang in candidate_angles:
             ang_t = torch.tensor(ang, dtype=torch.float32, device=device)
@@ -210,7 +212,7 @@ def partial_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.0
     2. Apply rotation.
     3. Translate back to the original centroid plus the estimated translation.
     """
-
+    set_seed(7)
     source_t = torch.tensor(source, dtype=torch.float32, device=device).unsqueeze(0)
     target_t = torch.tensor(target, dtype=torch.float32, device=device).unsqueeze(0)
     
@@ -299,7 +301,7 @@ def partial_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.0
                 B = t_batch.shape[0]
                 test_pos = rotated_s.expand(B, -1, -1) + t_batch.unsqueeze(1) 
 
-                dist_matrix = torch.cdist(test_pos, roi_batch, p=2)**2 
+                dist_matrix = torch.cdist(test_pos, roi_batch, p=2)**2
                 dist_src_to_tgt = torch.min(dist_matrix, dim=2)[0]
                 loss_batch = torch.mean(dist_src_to_tgt, dim=1)
                 
@@ -523,6 +525,75 @@ def No_rigid_alignment(source, target, epochs=800, lr=0.8, lambda_smooth=0.01, n
 
 
 
+
+
+
+def Multi_slices_rigid_alignment(adata_list, mode='reference', ref_idx=0, epochs=2000,sample_size=20000,enable_scale=False,device=None):
+    """
+    Align spatial coordinates of slices either to a fixed reference or sequentially.
+
+    Parameters
+    ----------
+    adata_list : list of AnnData
+        List of AnnData objects, each must contain .obsm['spatial'] coordinates.
+    mode : str, optional
+        'reference' : all slices are aligned to a fixed reference slice (specified by ref_idx).
+        'sequential' : sequential alignment, slice i is aligned to slice i-1 (first slice fixed).
+    ref_idx : int, optional
+        Index of the reference slice, only used when mode='reference'.
+    epochs : int, optional (default: 2000)
+        Number of optimization iterations.
+    sample_size : int, optional (default: 20000)
+        Number of cells randomly sampled from each slice per iteration.
+        If the slice has fewer cells, all points are used.
+    enable_scale : bool, optional (default: False)
+        If ``True``, allows isotropic scaling.  
+        Otherwise, only rotation and translation are applied.
+    device : str or torch.device, optional (default: None)
+        Computation device, e.g. ``"cuda"``, ``"cpu"``.  
+        If ``None``, the default PyTorch device is used.
+
+    Returns
+    -------
+    aligned_list : list of AnnData
+        A new list of AnnData objects after alignment (original unchanged).
+    """
+    # Create a deep copy of each AnnData object
+    # Using .copy() ensures independent objects (spatial coordinates are also copied)
+    aligned_list = [adata.copy() for adata in adata_list]
+
+    if mode == 'reference':
+        target = aligned_list[ref_idx].obsm['spatial'].astype(np.float32)
+        for i in range(len(aligned_list)):
+            if i == ref_idx:
+                print(f"\n--- Slice {i+1} is the reference, skipping ---")
+                continue
+            print(f"\n--- Aligning Slice {i+1} to Reference (Slice {ref_idx+1}) ---")
+            source = aligned_list[i].obsm['spatial'].astype(np.float32)
+            aligned_spatial, theta_deg, translation, scale = Rigid_alignment(
+                source, target, epochs=epochs, sample_size=sample_size,
+                enable_scale=enable_scale, device=device
+            )
+            aligned_list[i].obsm['spatial'] = aligned_spatial
+            
+
+    elif mode == 'sequential':
+        print(f"\n--- Slice 1 is the first slice ---")
+        for i in range(1, len(aligned_list)):
+            print(f"\n--- Aligning Slice {i+1} to Slice {i} (sequential alignment) ---")
+            source = aligned_list[i].obsm['spatial'].astype(np.float32)
+            target = aligned_list[i-1].obsm['spatial'].astype(np.float32)
+            aligned_spatial, theta_deg, translation, scale = Rigid_alignment(
+                source, target, epochs=epochs, sample_size=sample_size,
+                enable_scale=enable_scale, device=device
+            )
+            aligned_list[i].obsm['spatial'] = aligned_spatial
+
+    else:
+        raise ValueError("mode must be 'reference' or 'sequential'")
+
+    print("\n--- All slices have been aligned! ---")
+    return aligned_list
 
 
 
