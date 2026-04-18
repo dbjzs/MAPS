@@ -7,7 +7,8 @@ from scipy.spatial import cKDTree
 from MAPS.loss import chamfer_distance_torch
 from MAPS.loss import chamfer_distance_torch_bidirectional
 from MAPS.utils import set_seed
-
+import psutil
+import os
 
 
 
@@ -65,8 +66,12 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
     4. Translate back to the original centroid plus the estimated translation.
     """
     set_seed(7)
+    process = psutil.Process(os.getpid())
+    mem_start = process.memory_info().rss
     source_t = torch.tensor(source, dtype=torch.float32, device=device).unsqueeze(0)
     target_t = torch.tensor(target, dtype=torch.float32, device=device).unsqueeze(0)
+    if torch.cuda.is_available() and (device is None or torch.device(device).type == 'cuda'):
+        torch.cuda.reset_peak_memory_stats(device)
     
     s_center = source_t.mean(dim=1, keepdim=True)
     t_center = target_t.mean(dim=1, keepdim=True)
@@ -150,9 +155,12 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
     translation_np = translation.squeeze().detach().cpu().numpy()
     final_scale_np = scale.item() if enable_scale else 1.0
     
-    print(f"Scale factor: {final_scale_np:.3f}")
-    print(f"Rotation angle: {theta_deg - 360 if theta_deg > 180 else theta_deg:.2f}°")
-    print(f"Translation (x, y): {translation_np[0]:.2f}, {translation_np[1]:.2f}")
+    GPU_peak_memory = torch.cuda.max_memory_allocated(device) / (1024 ** 3)
+    mem_end = process.memory_info().rss 
+    CPU_peak_memory = (mem_end - mem_start) / (1024**3)
+    
+    print(f"Peak GPU memory usage: {GPU_peak_memory:.3f} GB, Peak CPU memory usuage: {CPU_peak_memory:.3f} GB",)
+    print(f"Scale factor: {final_scale_np:.3f}, Rotation angle: {theta_deg - 360 if theta_deg > 180 else theta_deg:.2f}°, Translation (x, y): ({translation_np[0]:.2f}, {translation_np[1]:.2f})")
     
     return aligned_np, theta_deg, translation_np, final_scale_np
 
