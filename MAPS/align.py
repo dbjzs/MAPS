@@ -81,7 +81,7 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
     mean_dist_t = torch.norm(target_t - t_center, dim=2).mean()
     init_scale_val = (mean_dist_t / mean_dist_s).item() if mean_dist_s > 0 else 1.0
 
-    candidate_angles = np.linspace(0, 2 * np.pi, 360, endpoint=False)
+    candidate_angles = np.linspace(0, 2 * np.pi, 180, endpoint=False)
     best_init_theta = 0.0
     min_coarse_loss = float('inf')
     
