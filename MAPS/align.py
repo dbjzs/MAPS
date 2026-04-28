@@ -234,7 +234,7 @@ def partial_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.0
     
     s_min = source_t.min(dim=1)[0].squeeze()
     s_max = source_t.max(dim=1)[0].squeeze()
-    roi_size = torch.max(s_max - s_min).item() * 1.6 
+    roi_size = torch.max(s_max - s_min).item() * 2 
     
     t_min = target_t.min(dim=1)[0].squeeze()
     t_max = target_t.max(dim=1)[0].squeeze()
