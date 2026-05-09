@@ -89,8 +89,8 @@ class COI(nn.Module):#COI(Cross-omics integration)
         self.encoder1 = LocalFeatureAggregation(in_channels1, out_channels)
         self.encoder2 = LocalFeatureAggregation(in_channels2, out_channels)
         
-        self.decoder1 = Decoder(out_channels, in_channels1, bn=False, activation_fn=None)
-        self.decoder2 = Decoder(out_channels, in_channels2, bn=False, activation_fn=None)
+        self.decoder1 = Decoder(out_channels, in_channels1, bn=False, activation_fn=nn.ReLU())
+        self.decoder2 = Decoder(out_channels, in_channels2, bn=False, activation_fn=nn.ReLU())
         
     def forward(self, features1, neighbor_idx1,features2,neighbor_idx2,neighbor_idx1_2):
         
@@ -120,7 +120,7 @@ class COI(nn.Module):#COI(Cross-omics integration)
             loss=loss1+loss2+loss3+5*loss_align
             loss.backward()
             optimizer.step()
-            pbar.set_postfix({"Epoch": epoch,"Loss": f"{loss.item():.3f}","Loss1": f"{loss1.item():.3f}","Loss2": f"{loss2.item():.3f}","Loss3": f"{loss3.item():.3f}","Loss4": f"{loss_align.item():.3f}"})
+            pbar.set_postfix({"Epoch": epoch,"Loss": f"{loss.item():.3f}","Loss1": f"{loss1.item():.3f}","Loss2": f"{loss2.item():.3f}","Loss3": f"{loss3.item():.3f}",  "Loss4": f"{loss_align.item():.3f}"}) #"Loss3": f"{loss3.item():.3f}"
 
 
     @torch.no_grad()
@@ -129,4 +129,79 @@ class COI(nn.Module):#COI(Cross-omics integration)
         reconstructed1, reconstructed2, reconstructed1_2, embedding1, embedding2, embedding1_2 = self(graph1.features, graph1.neighbor_idx, graph2.features, graph2.neighbor_idx, idx_1_to_2)
         embedding1=embedding1.cpu().numpy()
         embedding2=embedding2.cpu().numpy()
-        return embedding1, embedding2
+        reconstructed1=reconstructed1.cpu().numpy()
+        reconstructed2=reconstructed2.cpu().numpy()
+        return embedding1, embedding2,reconstructed1,reconstructed2
+
+
+class TripleCOI(nn.Module):#TripleCOI(TripleCross-omics integration)
+    def __init__(self, in_channels1,in_channels2,in_channels3, out_channels):
+        super().__init__()
+        self.encoder1 = LocalFeatureAggregation(in_channels1, out_channels)
+        self.encoder2 = LocalFeatureAggregation(in_channels2, out_channels)
+        self.encoder3 = LocalFeatureAggregation(in_channels3, out_channels)
+        
+        self.decoder1 = Decoder(out_channels, in_channels1, bn=False, activation_fn=nn.ReLU())
+        self.decoder2 = Decoder(out_channels, in_channels2, bn=False, activation_fn=nn.ReLU())
+        self.decoder3 = Decoder(out_channels, in_channels3, bn=False, activation_fn=nn.ReLU())
+        
+    def forward(self, features1, neighbor_idx1,features2,neighbor_idx2,features3,neighbor_idx3,neighbor_idx1_3,neighbor_idx2_3):
+        
+        embedding1 = self.encoder1(features1, neighbor_idx1)
+        embedding2 = self.encoder2(features2, neighbor_idx2)
+        embedding3 = self.encoder3(features3, neighbor_idx3)
+
+
+        
+        embedding1_3 = self.encoder3(features3, neighbor_idx1_3)
+        embedding2_3 = self.encoder3(features3, neighbor_idx2_3)
+        
+        reconstructed1 = self.decoder1(embedding1)
+        reconstructed2 = self.decoder2(embedding2)
+        reconstructed3 = self.decoder3(embedding3)
+        
+        reconstructed1_3 = self.decoder1(embedding1_3)
+        reconstructed2_3 = self.decoder2(embedding2_3)
+        
+        return reconstructed1, reconstructed2,reconstructed3, reconstructed1_3,reconstructed2_3, embedding1, embedding2,embedding3, embedding1_3,embedding2_3
+
+    def Train(self,graph1,graph2,graph3,idx_1_to_3,idx_2_to_3,epochs=200,lr=1e-3,device=None,seed=7):
+        set_seed(seed)
+        self.to(device)
+            
+        optimizer = optim.Adam(self.parameters(), lr=lr)
+        criterion = nn.MSELoss()
+        self.train()
+        pbar = tqdm(range(epochs), desc="Cross-modal integration", ncols=150)
+        for epoch in pbar:
+            optimizer.zero_grad()
+            reconstructed1, reconstructed2,reconstructed3, reconstructed1_3,reconstructed2_3, embedding1, embedding2,embedding3, embedding1_3,embedding2_3 = self(graph1.features, graph1.neighbor_idx, graph2.features, graph2.neighbor_idx,graph3.features,
+                                                                                                                                                                                                graph3.neighbor_idx,idx_1_to_3,idx_2_to_3)
+            loss1 = criterion(reconstructed1, graph1.features)
+            loss2 = criterion(reconstructed2, graph2.features)
+            loss3 = criterion(reconstructed3, graph3.features)
+            
+            loss4 = criterion(reconstructed1_3, graph1.features)
+            loss5 = criterion(reconstructed2_3, graph2.features)
+            
+            loss_align1 = criterion(embedding1, embedding1_3)
+            loss_align2 = criterion(embedding2, embedding2_3)
+            
+            loss=loss1+loss2+loss3+loss4+loss5+5*loss_align1+5*loss_align2
+            loss.backward()
+            optimizer.step()
+            pbar.set_postfix({"Epoch": epoch,"Total_Loss": f"{loss.item():.3f}","Loss_rec": f"{loss1+loss2+loss3+loss4+loss5.item():.3f}","Loss_align": f"{loss_align1+loss_align2.item():.3f}"})
+
+
+    @torch.no_grad()
+    def get_embedding(self,graph1,graph2,graph3,idx_1_to_3,idx_2_to_3,device=None):
+        self.eval()
+        reconstructed1, reconstructed2,reconstructed3, reconstructed1_3,reconstructed2_3, embedding1, embedding2,embedding3, embedding1_3,embedding2_3 = self(graph1.features, graph1.neighbor_idx, graph2.features, graph2.neighbor_idx,graph3.features,
+                                                                                                                                                                                            graph3.neighbor_idx,idx_1_to_3,idx_2_to_3)
+        embedding1=embedding1.cpu().numpy()
+        embedding2=embedding2.cpu().numpy()
+        embedding3=embedding3.cpu().numpy()
+        reconstructed1=reconstructed1.cpu().numpy()
+        reconstructed2=reconstructed2.cpu().numpy()
+        reconstructed3=reconstructed3.cpu().numpy()
+        return embedding1, embedding2,embedding3,reconstructed1,reconstructed2,reconstructed3

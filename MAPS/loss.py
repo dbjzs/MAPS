@@ -11,6 +11,7 @@ def chamfer_distance_torch(x, y):
     return torch.mean(dist_src_to_tgt)
 
 
+
 def chamfer_distance_torch_bidirectional(x, y):
     if x.dim() == 2:
         x = x.unsqueeze(0)  # (1, N, D)

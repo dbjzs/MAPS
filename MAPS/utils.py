@@ -94,6 +94,21 @@ def prepare_paired_inputs(source_adata, target_adata, k_intra, k_inter, device):
     return graph1, graph2, idx_1_to_2
 
 
+def Triple_prepare_paired_inputs(source_adata1,source_adata2, target_adata, k_intra, k_inter, device):
+    graph1 = prepare_inputs(source_adata1, k_intra, device)
+    graph2 = prepare_inputs(source_adata2, k_intra, device)
+    graph3 = prepare_inputs(target_adata, k_intra, device)
+    
+    coords1 = source_adata1.obsm['spatial']
+    coords2 = source_adata2.obsm['spatial']
+    coords3 = target_adata.obsm['spatial']
+    
+    idx_1_to_3 = build_cross_slice_idx(coords1, coords3, k_inter).to(device)
+    idx_2_to_3 = build_cross_slice_idx(coords2, coords3, k_inter).to(device)
+    
+    return graph1, graph2,graph3, idx_1_to_3,idx_2_to_3
+
+
 
 
 
