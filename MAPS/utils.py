@@ -56,7 +56,6 @@ def build_neighbor_idx(coords, k):
     N = coords.shape[0]
     tree = cKDTree(coords)
     _, indices = tree.query(coords, k=k, workers=-1)  # indices: (N, k)
-    indices = indices[:, 1:]
     return torch.tensor(indices, dtype=torch.long)
 
 def build_cross_slice_idx(coords1, coords2, k):
