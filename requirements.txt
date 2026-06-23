@@ -11,5 +11,4 @@ leidenalg==0.10.2
 igraph==0.11.8
 scikit-misc==0.5.1
 pynndescent==0.5.13
-pyimzml==1.5.5
-intervaltree==3.2.1
+tifffile==2025.5.10
