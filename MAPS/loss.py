@@ -28,3 +28,4 @@ def chamfer_distance_torch_bidirectional(x, y):
 
     chamfer_loss = (loss_src_to_tgt + loss_tgt_to_src) / 2.0
     return chamfer_loss
+

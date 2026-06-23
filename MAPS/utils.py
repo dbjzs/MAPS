@@ -9,6 +9,10 @@ import torch.optim as optim
 import random
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import tifffile
+from matplotlib.colors import ListedColormap
+from matplotlib.lines import Line2D
+
 
 def set_seed(seed):
     random.seed(seed)
@@ -389,6 +393,222 @@ def extract_rois(source_np, target_np, grid_size=(4, 4), min_pts=100,s=0.3):
     return source_rois
 
 
+def extract_rois_atlas(source_np, grid_size=(4, 4), min_pts=100, s=0.3):
+    p_min, p_max = source_np.min(axis=0), source_np.max(axis=0)
+    num_x, num_y = grid_size
+    
+    step_x = (p_max[0] - p_min[0]) / num_x
+    step_y = (p_max[1] - p_min[1]) / num_y
+    
+    source_rois = []
+    roi_id = 0
+    
+    for i in range(num_x):
+        for j in range(num_y):
+            x_start = p_min[0] + i * step_x
+            x_end = p_min[0] + (i + 1) * step_x
+            y_start = p_min[1] + j * step_y
+            y_end = p_min[1] + (j + 1) * step_y
+            
+            mask = (source_np[:, 0] >= x_start) & (source_np[:, 0] <= x_end) & \
+                   (source_np[:, 1] >= y_start) & (source_np[:, 1] <= y_end)
+            p = source_np[mask]
+            
+            if len(p) > min_pts:
+                source_rois.append({
+                    'id': roi_id,
+                    'points': p,
+                    'center': p.mean(axis=0),
+                    'bbox': (x_start, y_start, step_x, step_y)
+                })
+                roi_id += 1
 
+    fig, ax = plt.subplots(figsize=(6, 5))
+    
+    ax.scatter(source_np[:, 0], source_np[:, 1], s=s, c='whitesmoke', zorder=0)
+    
+    for roi in source_rois:
+        r_id_str = str(roi['id'])
+        color = default_color_dict.get(r_id_str, "#000000") 
+        
+        x, y, w, h = roi['bbox']
+        
+        ax.scatter(roi['points'][:, 0], roi['points'][:, 1], s=s, c=color, zorder=1)
+        rect = patches.Rectangle((x, y), w, h, linewidth=2, edgecolor=color, facecolor='none', alpha=0.8, zorder=2)
+        ax.add_patch(rect)
+        
+        ax.text(x + w/2, y + h/2, r_id_str, color='black', fontsize=12, fontweight='bold', 
+                ha='center', va='center', bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', pad=2), zorder=3)
+        
+    ax.set_title(f"Source Grid ROIs Colored (Total: {len(source_rois)})", fontsize=14)
+    ax.axis('equal')
+
+    plt.tight_layout()
+    plt.show()
+
+    return source_rois
+    
+
+
+def plot_2d_alignment_to_3d_flow(
+    source_adata, target_adata, label_key='label', palette=None,
+    n_lines=500, height_scale=1.0, size=2, alpha_points=0.6, alpha_lines=0.6,alpha=0.5,
+    xlim=None, ylim=None, save_path=None
+):
+    source_coords = source_adata.obsm['spatial']
+    target_coords = target_adata.obsm['spatial']
+    
+    source_labels = source_adata.obs[label_key].values
+    target_labels = target_adata.obs[label_key].values
+    
+    #3D
+    source_3d = np.hstack((source_coords, np.zeros((len(source_coords), 1))))
+    target_3d = np.hstack((target_coords, np.full((len(target_coords), 1), height_scale)))
+    
+    tree = cKDTree(target_coords)
+    _, indices = tree.query(source_coords, k=1)
+    
+    matched_target_3d = target_3d[indices]
+    matched_target_labels = target_labels[indices]
+    
+    #palette
+    if palette is None:
+        unique_labels = sorted(list(set(source_labels) | set(target_labels)))
+        cmap = plt.get_cmap('tab20')
+        palette = {lbl: cmap(i / len(unique_labels)) for i, lbl in enumerate(unique_labels)}
+        
+    source_colors = np.array([palette.get(lbl, '#cccccc') for lbl in source_labels])
+    target_colors = np.array([palette.get(lbl, '#cccccc') for lbl in target_labels])
+    
+    fig = plt.figure(figsize=(12, 10))
+    ax = fig.add_subplot(111, projection="3d")
+    
+    ax.scatter(source_3d[:, 0], source_3d[:, 1], source_3d[:, 2],c=source_colors, s=size, alpha=alpha_points)
+    ax.scatter(target_3d[:, 0], target_3d[:, 1], target_3d[:, 2],c=target_colors, s=size, alpha=alpha_points)
+    
+    rng = np.random.default_rng(42)
+    sample_indices = rng.choice(len(source_coords), size=min(n_lines, len(source_coords)), replace=False)
+    
+    correct_count = 0
+    incorrect_count = 0
+    
+    for idx in sample_indices:
+        start = source_3d[idx]
+        end = matched_target_3d[idx]
+        
+        if source_labels[idx] == matched_target_labels[idx]:
+            line_color = 'black'
+            correct_count += 1
+        else:
+            line_color = 'red'
+            incorrect_count += 1
+            
+        ax.plot(
+            [start[0], end[0]], 
+            [start[1], end[1]], 
+            [start[2], end[2]],
+            color=line_color, 
+            linewidth=0.8,         
+            alpha=alpha_lines,
+            linestyle='--'       
+        )
+        
+    print(f"Connected sampling (total {len(sample_indices)}):")
+    print(f"   - Correct pairing (Black): {correct_count}")
+    print(f"   - Incorrect pairing (red): {incorrect_count}")
+    
+    ax.view_init(elev=25, azim=-45)
+    if xlim: ax.set_xlim(*xlim)
+    if ylim: ax.set_ylim(*ylim)
+    ax.set_zlim(-0.1, height_scale + 0.1)
+    
+    ax.set_axis_off() 
+    plt.tight_layout()
+    
+    if save_path:
+        fig.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"Figure saved in: {save_path}")
+        
+    plt.show()
+
+
+
+
+
+def plot_aligned_adata_on_if(image_path, adata, level=0, color_by='cell_type', is_gene=False, origin='lower', s=0.5, alpha=0.6,figsize=(9,8),dpi=300,palette=None,cmap='Blues',save_path=None):
+    with tifffile.TiffFile(image_path) as tif:
+        full_shape = tif.series[0].shape
+        preview_level = tif.series[0].levels[level]
+        low_shape = preview_level.shape
+        img = preview_level.asarray()
+        if img.ndim == 3:
+            if img.shape[0] < img.shape[2]: # (C, H, W) -> (H, W, C)
+                full_w = full_shape[2]
+                low_w = low_shape[2]
+                img = img.transpose(1, 2, 0)
+            else:
+                full_w = full_shape[1]
+                low_w = low_shape[1]
+        else:
+            full_w = full_shape[1]
+            low_w = low_shape[1]
+            
+    scale_factor = low_w / full_w
+    
+    small_img = img[::8, ::8] if img.ndim==2 else img[::8, ::8, :]  
+    p_low, p_high = np.percentile(small_img, [1, 99.7])
+    img_bright = np.clip((img - p_low) / (p_high - p_low), 0, 1)
+    spatial_coords = adata.obsm['spatial'] * scale_factor
+    x_dots = spatial_coords[:, 0]
+    y_dots = spatial_coords[:, 1]
+    
+    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+    
+    ax.imshow(img_bright, origin=origin)
+    if is_gene:
+        gene_expr = adata[:, color_by].X
+        if hasattr(gene_expr, "toarray"):
+            gene_expr = gene_expr.toarray()
+        gene_expr = gene_expr.flatten()
+        keep = gene_expr > 0
+        
+        scatter = ax.scatter(x_dots[keep], y_dots[keep], c=gene_expr[keep], cmap=cmap, s=s*0.5, alpha=alpha)
+        
+        plt.colorbar(scatter, ax=ax, label=f'{color_by} Expression', shrink=0.645, pad=0.02)
+        
+    else:
+        cell_categories = adata.obs[color_by].astype('category')
+        codes = cell_categories.cat.codes
+        categories = cell_categories.cat.categories
+        n_cats = len(categories)
+        
+        if palette is None:
+            cmap = plt.cm.tab20 
+        elif isinstance(palette, str):
+            cmap = plt.get_cmap(palette)
+        elif isinstance(palette, list):
+            cmap = ListedColormap(palette)
+        elif isinstance(palette, dict):
+            ordered_colors = [palette[cat] for cat in categories]
+            cmap = ListedColormap(ordered_colors)
+        else:
+            raise ValueError("palette must be None, str, list, or dict")
+        
+        scatter = ax.scatter(x_dots, y_dots, c=codes, cmap=cmap, s=s*0.5, alpha=alpha)
+        handles = []
+        for i, cat in enumerate(categories):
+            if isinstance(cmap, ListedColormap):
+                color = cmap(i % cmap.N)
+            else:
+                color = cmap(i / max(1, n_cats-1))
+            handles.append(Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=8, label=cat))
+            
+        ax.legend(handles=handles, title=color_by, bbox_to_anchor=(0.99, 1.04), loc='upper left',frameon=False)
+  
+    ax.axis('off')
+    plt.tight_layout()
+    if save_path is not None:
+        fig.savefig(save_path, dpi=dpi, bbox_inches='tight')
+    return fig, ax
 
 

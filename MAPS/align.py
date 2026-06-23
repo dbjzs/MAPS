@@ -167,7 +167,6 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
 
 
 
-
 def partial_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01, lr_trans=0.5, device=None):
     """
     Partially align a source slice to a target slice using region‑of‑interest (ROI) guided rigid transformation.
@@ -354,13 +353,14 @@ def partial_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.0
 
 
 
-
-def transform_full_source(source_np, roi, theta_deg, translation_np):
+def transform_full_source(source_np, roi, theta_deg, translation_np, scale=1.0):
     """
-    Apply a rigid transformation (rotation + translation) to the full source slice.
+    Apply a similarity transformation (scaling + rotation + translation) to the full source slice.
 
-    The transformation is defined relative to an anchor point (the centroid of a reference ROI) and consists of a rotation followed by a translation.  
-    This function is typically used after :func:`partial_alignment` to align the entire source slice using the transformation estimated from a partially overlapping region (ROI).
+    The transformation is defined relative to an anchor point (the centroid of a reference ROI) 
+    and consists of scaling and rotation followed by a translation.  
+    This function is typically used after :func:`partial_alignment` to align the entire source slice 
+    using the transformation estimated from a partially overlapping region (ROI).
 
     Parameters
     ----------
@@ -369,12 +369,14 @@ def transform_full_source(source_np, roi, theta_deg, translation_np):
         Each row contains ``(x, y)`` coordinates.
     roi : np.ndarray
         Reference region of interest (ROI) from the source or target, shape ``(Nroi, 2)``.
-        Its centroid is used as the rotation anchor.  
+        Its centroid is used as the rotation/scaling anchor.  
         Usually this is the ROI in the source that matched a target ROI during partial alignment.
     theta_deg : float
         Rotation angle in degrees. Positive values indicate counter‑clockwise rotation.
     translation_np : np.ndarray
-        Translation vector, shape ``(2,)``, to be applied after rotation.
+        Translation vector, shape ``(2,)``, to be applied after rotation and scaling.
+    scale : float, optional
+        Scale factor to be applied to the centered coordinates. Default is 1.0.
 
     Returns
     -------
@@ -386,144 +388,21 @@ def transform_full_source(source_np, roi, theta_deg, translation_np):
     The transformation is applied in the following order:
 
     1. Center the source cloud by subtracting the anchor point (centroid of ``roi``).
-    2. Rotate the centered points by angle ``theta_deg``.
+    2. Scale and rotate the centered points by ``scale`` and angle ``theta_deg``.
     3. Add back the anchor point.
     4. Apply the translation vector.
     """
-    
     anchor_center = np.mean(roi, axis=0)
     theta_rad = theta_deg * np.pi / 180.0
     cos_t = np.cos(theta_rad)
     sin_t = np.sin(theta_rad)
     R = np.array([[cos_t, -sin_t], [sin_t,  cos_t]])
     full_centered = source_np - anchor_center
-    aligned_full_source = np.dot(full_centered, R.T) + anchor_center + translation_np
+    aligned_full_source = scale * np.dot(full_centered, R.T) + anchor_center + translation_np
+    
     return aligned_full_source
 
 
-
-def rbf_kernel(x, y, lengthscale=150.0, variance=1.0):
-    """RBF"""
-    dist = torch.cdist(x, y, p=2)
-    return variance * torch.exp(-dist ** 2 / (2 * lengthscale ** 2))
-
-def No_rigid_alignment(source, target, epochs=800, lr=0.8, lambda_smooth=0.01, n_inducing=400,sample_size=15000, lengthscale=150.0,device=None):
-    
-    """
-    Non‑rigid alignment of a source point cloud to a target using a Gaussian process‑like displacement vector field.
-
-    The method models the displacement field as a zero‑mean Gaussian process with an RBF kernel. 
-    Sparse inducing points are selected from the source slice, and their displacement vectors are optimized to minimize the bidirectional Chamfer distance between the warped source 
-    and the target, regularized by the norm of the inducing displacements.
-
-    Parameters
-    ----------
-    source : np.ndarray
-        Source slice, shape ``(Nsource, 2)``.  
-        Each row contains ``(x, y)`` coordinates.
-    target : np.ndarray
-        Target slice, shape ``(Ntarget, 2)``.  
-        Each row contains ``(x, y)`` coordinates.
-    epochs : int, optional (default: 800)
-        Number of optimization iterations.
-    lr : float, optional (default: 0.8)
-        Learning rate for the Adam optimizer.
-    lambda_smooth : float, optional (default: 0.01)
-        Regularisation strength for the smoothness term (mean L2 norm of inducing displacements).
-    n_inducing : int, optional (default: 400)
-        Number of inducing points used to parametrise the displacement field.
-        If ``n_inducing`` exceeds the number of source points, all source slice are used.
-    sample_size : int, optional (default: 15000)
-        Number of source points randomly sampled per iteration to compute the Chamfer loss.
-    lengthscale : float, optional (default: 150.0)
-        Lengthscale parameter of the RBF kernel, controlling the spatial smoothness
-        of the displacement field.
-    device : str or torch.device, optional (default: None)
-        Computation device, e.g. ``"cuda"``, ``"cpu"``.  
-        If ``None``, the default PyTorch device is used.
-
-    Returns
-    -------
-    final_coords : np.ndarray
-        Warped source point cloud, shape ``(n_points, 2)``.  
-        Coordinates are transformed back to the original global coordinate system
-        (i.e. the centroid of the source is restored).
-    dvf_vectors : np.ndarray
-        Displacement vector field, shape ``(n_points, 2)``.  
-        Each row is the estimated displacement applied to the corresponding source point.
-    """
-
-    
-    src_center = source.mean(axis=0)
-    source_norm = source - src_center
-    target_norm = target - src_center
-    
-    source_tensor = torch.from_numpy(source_norm).float().to(device)
-    target_tensor = torch.from_numpy(target_norm).float().to(device)
-    
-    N = source_tensor.shape[0]
-    
-    if N > n_inducing:
-        inducing_idx = torch.randperm(N, device=device)[:n_inducing]
-    else:
-        inducing_idx = torch.arange(N, device=device)
-        n_inducing = N
-    
-    inducing_points = source_tensor[inducing_idx].clone().detach()
-    
-    u = torch.zeros((n_inducing, 2), device=device, requires_grad=True)  
-    
-    optimizer = torch.optim.Adam([u], lr=lr)
-    
-    pbar = tqdm(range(epochs), desc="GP-like DVF (Chamfer)", ncols=150)
-    
-    for epoch in pbar:
-        optimizer.zero_grad()
-        
-        if N > sample_size:
-            idx = torch.randperm(N, device=device)[:sample_size]
-            s_sampled = source_tensor[idx]
-        else:
-            idx = slice(None)
-            s_sampled = source_tensor
-        
-        K_su = rbf_kernel(s_sampled, inducing_points, lengthscale=lengthscale)
-        K_uu = rbf_kernel(inducing_points, inducing_points, lengthscale=lengthscale)
-        
-        with torch.no_grad(): 
-            K_uu_inv = torch.linalg.pinv(K_uu + 1e-4 * torch.eye(n_inducing, device=device))
-        
-        displacement_sampled = K_su @ (K_uu_inv @ u)   
-        
-        transformed = s_sampled + displacement_sampled
-        
-        # Chamfer loss
-        loss_dist = chamfer_distance_torch_bidirectional(
-            transformed.unsqueeze(0), target_tensor.unsqueeze(0)
-        )
-        
-        # Smooth regularization
-        loss_smooth = torch.mean(torch.norm(u, dim=1))
-        
-        total_loss = loss_dist + lambda_smooth * loss_smooth
-        
-        total_loss.backward()
-        torch.nn.utils.clip_grad_norm_([u], max_norm=10.0)
-        optimizer.step()
-        
-        if epoch % 20 == 0:
-            pbar.set_postfix({"Chamfer": f"{loss_dist.item():.6f}","Smooth": f"{loss_smooth.item():.6f}"})
-    
-    with torch.no_grad():
-        K_full = rbf_kernel(source_tensor, inducing_points, lengthscale=lengthscale)
-        K_uu_inv = torch.linalg.pinv(rbf_kernel(inducing_points, inducing_points, lengthscale=lengthscale) 
-                                     + 1e-4 * torch.eye(n_inducing, device=device))
-        final_displacement = K_full @ (K_uu_inv @ u)
-        
-        final_coords = (source_tensor + final_displacement).cpu().numpy() + src_center
-        dvf_vectors = final_displacement.cpu().numpy()   
-    
-    return final_coords, dvf_vectors
 
 
 
@@ -601,6 +480,226 @@ def Multi_slices_rigid_alignment(adata_list, mode='reference', ref_idx=0, epochs
 
 
 
+
+
+def Rigid_alignment_atlas(source, target, epochs=2000, sample_size=20000, lr_rot=0.01, lr_trans=0.5, lr_scale=0.0001, enable_scale=False, device=None):
+    set_seed(7)
+    source_t = torch.tensor(source, dtype=torch.float32, device=device).unsqueeze(0)
+    target_t = torch.tensor(target, dtype=torch.float32, device=device).unsqueeze(0)
+    if torch.cuda.is_available() and (device is None or torch.device(device).type == 'cuda'):
+        torch.cuda.reset_peak_memory_stats(device)
+    
+    s_center = source_t.mean(dim=1, keepdim=True)
+    t_center = target_t.mean(dim=1, keepdim=True)
+    s_centered = source_t - s_center
+    
+    mean_dist_s = torch.norm(s_centered, dim=2).mean()
+    mean_dist_t = torch.norm(target_t - t_center, dim=2).mean()
+    init_scale_val = (mean_dist_t / mean_dist_s).item() if mean_dist_s > 0 else 1.0
+
+    candidate_angles = np.linspace(0, 2 * np.pi, 180, endpoint=False)
+    best_init_theta = 0.0
+    min_coarse_loss = float('inf')
+    
+    with torch.no_grad():
+        idx_s_c = torch.randperm(s_centered.shape[1], device=device)[:sample_size]
+        idx_t_c = torch.randperm(target_t.shape[1], device=device)[:sample_size]
+        
+        for ang in candidate_angles:
+            ang_t = torch.tensor(ang, dtype=torch.float32, device=device)
+            cos_a, sin_a = torch.cos(ang_t), torch.sin(ang_t)
+            R_c = torch.stack([torch.stack([cos_a, -sin_a]), torch.stack([sin_a, cos_a])])
+    
+            test_pos = init_scale_val * torch.matmul(s_centered[:, idx_s_c, :], R_c.T) + t_center
+            loss_c = chamfer_distance_torch_bidirectional(test_pos, target_t[:, idx_t_c, :])
+            if loss_c < min_coarse_loss:
+                min_coarse_loss = loss_c
+                best_init_theta = ang
+
+    theta = torch.tensor([best_init_theta], dtype=torch.float32, device=device, requires_grad=True)
+    translation = (t_center - s_center).clone().detach().requires_grad_(True)
+    
+    if enable_scale:
+        scale = torch.tensor([init_scale_val], dtype=torch.float32, device=device, requires_grad=True)
+        optimizer = torch.optim.Adam([{'params': [theta], 'lr': lr_rot},{'params': [translation], 'lr': lr_trans},{'params': [scale], 'lr': lr_scale}], betas=(0.9, 0.999))
+    else:
+        scale = torch.tensor([1.0], dtype=torch.float32, device=device)  
+        optimizer = torch.optim.Adam([{'params': [theta], 'lr': lr_rot},{'params': [translation], 'lr': lr_trans}], betas=(0.9, 0.999))
+
+    pbar = tqdm(range(epochs), desc="Global Align", ncols=150)
+
+    for epoch in pbar:
+        optimizer.zero_grad()
+        cos_t, sin_t = torch.cos(theta), torch.sin(theta)
+        R = torch.stack([torch.stack([cos_t[0], -sin_t[0]]), torch.stack([sin_t[0], cos_t[0]])])
+        
+        idx_s = torch.randperm(s_centered.shape[1], device=device)[:sample_size]
+        idx_t = torch.randperm(target_t.shape[1], device=device)[:sample_size]
+        
+        if enable_scale:
+            transformed = scale * torch.matmul(s_centered[:, idx_s, :], R.T) + s_center + translation
+        else:
+            transformed = torch.matmul(s_centered[:, idx_s, :], R.T) + s_center + translation
+        loss = chamfer_distance_torch_bidirectional(transformed, target_t[:, idx_t, :])
+
+        final_loss = loss.item()
+        loss.backward()
+        optimizer.step()
+        
+        if epoch % 20 == 0:
+            curr_theta_deg = theta.item() * 180 / np.pi
+            curr_theta_norm = curr_theta_deg % 360
+            curr_trans = translation.squeeze().detach().cpu().numpy()
+            curr_scale = scale.item() if enable_scale else 1.0
+            pbar.set_postfix({"Loss": f"{loss.item():.2f}", 
+                "Scale": f"{curr_scale:.3f}", 
+                "Rot": f"{curr_theta_norm-360 if curr_theta_norm > 180 else curr_theta_norm:.2f}°", 
+                "Trans": f"({curr_trans[0]:.1f}, {curr_trans[1]:.1f})"
+            })
+
+    with torch.no_grad():
+        cos_t, sin_t = torch.cos(theta), torch.sin(theta)
+        final_R = torch.stack([torch.stack([cos_t[0], -sin_t[0]]), torch.stack([sin_t[0], cos_t[0]])])
+        
+        if enable_scale:
+            final_coords = scale * torch.matmul(s_centered, final_R.T) + s_center + translation
+        else:
+            final_coords = torch.matmul(s_centered, final_R.T) + s_center + translation
+
+    aligned_np = final_coords.squeeze(0).cpu().numpy()
+    theta_deg = theta.item() * 180 / np.pi
+    translation_np = translation.squeeze().detach().cpu().numpy()
+    final_scale_np = scale.item() if enable_scale else 1.0
+    
+    GPU_peak_memory = torch.cuda.max_memory_allocated(device) / (1024 ** 3)
+    return aligned_np, theta_deg, translation_np, final_scale_np, final_loss
+
+
+
+def Align_slice_to_atlas(source_input, atlas_adata_list, top_k=3, epochs=2000, sample_size=20000, enable_scale=False, device=None):
+    set_seed(7)
+    
+    if hasattr(source_input, 'obsm'):
+        is_adata = True
+        source_raw = source_input.obsm['spatial'].astype(np.float32)
+    else:
+        is_adata = False
+        source_raw = source_input.astype(np.float32)
+        
+    s_min = source_raw.min(axis=0)
+    s_zeroed = source_raw - s_min
+    s_max_span = s_zeroed.max()  
+    source = (s_zeroed / s_max_span) * 500
+    
+    source_t = torch.tensor(source, dtype=torch.float32, device=device).unsqueeze(0)
+    s_center = source_t.mean(dim=1, keepdim=True)
+    s_centered = source_t - s_center
+    mean_dist_s = torch.norm(s_centered, dim=2).mean()
+    
+    coarse_losses = []
+    candidate_angles = np.linspace(0, 2 * np.pi, 180, endpoint=False) 
+    
+    print(">>> Atlas Scanning...")
+    for idx, atlas_adata in enumerate(tqdm(atlas_adata_list, desc="Atlas Scanning", ncols=150)):
+        target_raw = atlas_adata.obsm['spatial'].astype(np.float32)
+        
+        t_min = target_raw.min(axis=0)
+        t_zeroed = target_raw - t_min
+        t_max_span = t_zeroed.max()
+        target_scaled = (t_zeroed / t_max_span) * 1000
+        
+        target_t = torch.tensor(target_scaled, dtype=torch.float32, device=device).unsqueeze(0)
+        t_center = target_t.mean(dim=1, keepdim=True)
+        mean_dist_t = torch.norm(target_t - t_center, dim=2).mean()
+        init_scale_val = (mean_dist_t / mean_dist_s).item() if (mean_dist_s > 0 and enable_scale) else 1.0
+        
+        with torch.no_grad():
+            actual_s_size = min(s_centered.shape[1], sample_size)
+            actual_t_size = min(target_t.shape[1], sample_size)
+            idx_s_c = torch.randperm(s_centered.shape[1], device=device)[:actual_s_size]
+            idx_t_c = torch.randperm(target_t.shape[1], device=device)[:actual_t_size]
+            
+            min_c_loss = float('inf')
+            for ang in candidate_angles:
+                ang_t = torch.tensor(ang, dtype=torch.float32, device=device)
+                cos_a, sin_a = torch.cos(ang_t), torch.sin(ang_t)
+                R_c = torch.stack([torch.stack([cos_a, -sin_a]), torch.stack([sin_a, cos_a])])
+                
+                test_pos = init_scale_val * torch.matmul(s_centered[:, idx_s_c, :], R_c.T) + t_center
+                loss_c = chamfer_distance_torch_bidirectional(test_pos, target_t[:, idx_t_c, :])
+                
+                norm_loss_c = loss_c.item() / actual_t_size 
+                if norm_loss_c < min_c_loss:
+                    min_c_loss = norm_loss_c
+                    
+            coarse_losses.append((idx, min_c_loss))
+            
+    coarse_losses.sort(key=lambda x: x[1])
+    top_candidates = coarse_losses[:top_k]
+    print(f"Coarse screening complete！The most likely slices is: {[x[0] for x in top_candidates]} in adata_list")
+    
+    print(f"\n>>> Top {top_k} candidate slices...")
+    best_atlas_idx = None
+    best_atlas_label = None
+    best_final_loss = float('inf')
+    best_alignment_results = None
+    
+    best_t_min = None
+    best_t_max_span = None
+    
+    for rank, (atlas_idx, _) in enumerate(top_candidates):
+        target_adata = atlas_adata_list[atlas_idx]
+        if 'batch' in target_adata.obs.columns:
+            batch_label = target_adata.obs['batch'].iloc[0]
+        else:
+            batch_label = f"Slice_{atlas_idx}"
+            
+        print(f"\nEvaluating candidates {rank+1}/{top_k} (Atlas batch: {batch_label})")
+        
+        target_raw = target_adata.obsm['spatial'].astype(np.float32)
+        t_min = target_raw.min(axis=0)
+        t_zeroed = target_raw - t_min
+        t_max_span = t_zeroed.max()
+        target_scaled = (t_zeroed / t_max_span) * 1000
+
+        aligned_spatial, theta_deg, translation, scale, current_loss = Rigid_alignment_atlas(
+            source, target_scaled, epochs=epochs, sample_size=sample_size,
+            enable_scale=enable_scale, device=device
+        )
+        
+        actual_t_size = min(target_raw.shape[0], sample_size)
+        norm_current_loss = current_loss / actual_t_size
+        
+        if norm_current_loss < best_final_loss:
+            best_final_loss = norm_current_loss
+            best_atlas_idx = atlas_idx
+            best_atlas_label = batch_label
+            best_alignment_results = (aligned_spatial, theta_deg, translation, scale)
+            best_t_min = t_min
+            best_t_max_span = t_max_span
+            
+    print(f"\n Match done！The best match is adata_list[{best_atlas_idx}] slice in the atlas (Label: {best_atlas_label})")
+
+    aligned_spatial_canvas = best_alignment_results[0] 
+    aligned_roi_np = ((aligned_spatial_canvas / 1000.0) * best_t_max_span + best_t_min).astype(np.float32)
+    
+    best_target_raw = atlas_adata_list[best_atlas_idx].obsm['spatial'].astype(np.float32)
+    t_center_raw = best_target_raw.mean(axis=0)
+    s_center_raw = source_raw.mean(axis=0)
+    
+    fine_translation_raw = (best_alignment_results[2] / 1000.0) * best_t_max_span
+    absolute_translation_np = t_center_raw - s_center_raw + fine_translation_raw
+    
+    raw_scale = best_alignment_results[3] * 0.5 * (best_t_max_span / s_max_span)
+    theta_deg = best_alignment_results[1]
+
+    if is_adata:
+        aligned_adata = source_input.copy()
+        aligned_adata.obsm['spatial'] = aligned_roi_np
+        aligned_adata.uns['atlas_match'] = {'best_atlas_slice_idx': best_atlas_label,'rotation_deg': theta_deg,'translation': absolute_translation_np, 'scale': raw_scale}
+        return aligned_adata
+    else:
+        return best_atlas_label, aligned_roi_np, theta_deg, absolute_translation_np, raw_scale
 
 
 
