@@ -1,6 +1,3 @@
-<div align=center>
-<img src="https://github.com/dbjzs/MAPS/blob/main/logo.svg" width="200"  alt="MAPS-logo" >
-</div>
 
 # MAPS 
 A lightweight, ultrafast, and universal alignment framework for large-scale heterogeneous spatial omics data.
