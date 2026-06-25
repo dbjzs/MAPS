@@ -1,6 +1,4 @@
-<div align=center>
-<img src="https://github.com/dbjzs/MAPS/blob/main/Log.svg" width="400"  alt="MAPS-logo" >
-</div>
+
 
 
 ## Installation via Github
