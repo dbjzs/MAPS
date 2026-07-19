@@ -32,3 +32,16 @@ pip install .
 - The expected data input format of SpaLP is [AnnData](https://anndata.readthedocs.io/en/stable/) object.
 - Please use [issues](https://github.com/dbjzs/MAPS/issues) to submit bug reports.  
 
+### Reference
+- If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv]().
+
+```
+@article{,
+  title = {},
+  author = {Dai, et al.},
+  year = {2026},
+  journal = {bioRxiv : the preprint server for biology},
+  eprint = {},
+  doi = {},
+}
+```
