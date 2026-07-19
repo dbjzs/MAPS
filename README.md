@@ -27,4 +27,7 @@ conda activate MAPS
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install .
 ```
-## Getting Started
+### 🚀Getting started Tutorial
+- Jupyter tutorials and API documentation are available at [Tutorial](https://spalp.readthedocs.io/en/latest/index.html).
+- The expected data input format of SpaLP is [AnnData](https://anndata.readthedocs.io/en/stable/) object.  
+
