@@ -28,6 +28,6 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install .
 ```
 ### 🚀Getting started Tutorial
-- Jupyter tutorials and API documentation are available at [Tutorial](https://spalp.readthedocs.io/en/latest/index.html).
+- Jupyter tutorials and API documentation are available at [Tutorial](https://maps-tools.readthedocs.io/en/latest/).
 - The expected data input format of SpaLP is [AnnData](https://anndata.readthedocs.io/en/stable/) object.  
 
