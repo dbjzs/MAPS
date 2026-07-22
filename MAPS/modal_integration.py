@@ -89,8 +89,8 @@ class COI(nn.Module):#COI(Cross-omics integration)
         self.encoder1 = LocalFeatureAggregation(in_channels1, out_channels)
         self.encoder2 = LocalFeatureAggregation(in_channels2, out_channels)
         
-        self.decoder1 = Decoder(out_channels, in_channels1, bn=False, activation_fn=None)
-        self.decoder2 = Decoder(out_channels, in_channels2, bn=False, activation_fn=None)
+        self.decoder1 = Decoder(out_channels, in_channels1, bn=False, activation_fn=nn.ReLU())
+        self.decoder2 = Decoder(out_channels, in_channels2, bn=False, activation_fn=nn.ReLU())
         
     def forward(self, features1, neighbor_idx1,features2,neighbor_idx2,neighbor_idx1_2):
         
