@@ -12,3 +12,4 @@ igraph==0.11.8
 scikit-misc==0.5.1
 pynndescent==0.5.13
 tifffile==2025.5.10
+imagecodecs==2025.3.30
