@@ -1,5 +1,6 @@
 <div align=center>
-<img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >
+<img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >  
+  
 <font size="3">
   A modality-agnostic package that integrates ultrafast cross-modal alignment, unpaired/paired multimodal integration, and interactive 3D exploration for spatial omics
 </font>  
