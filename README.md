@@ -40,8 +40,8 @@ pip install .
 
 ```
 @article{,
-  title = {},
-  author = {Dai, Yan, Wang, Liang,....Yuan* et al.},
+  title = {Unifying physical and molecular coordinates systems across modalities in spatial biology},
+  author = {Dai, Yan, Wang*, Liang,....Zuo*, Qian*, Yuan* et al.},
   year = {2026},
   journal = {bioRxiv : Unifying physical and molecular coordinates systems across modalities in spatial biology},
   eprint = {},
