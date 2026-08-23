@@ -1,7 +1,7 @@
 <div align=center>
 <img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >
 </div>
-**MAPS is a modality-agnostic computational package that integrates ultrafast cross-modal alignment, unpaired/paired multimodal integration, and interactive 3D exploration for spatial omics data.**
+**MAPS is a modality-agnostic computational package that integrates ultrafast cross-modal alignment, unpaired/paired multimodal integration, and interactive 3D exploration for spatial omics data.**  
 ---
 
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
