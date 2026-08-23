@@ -1,14 +1,16 @@
 <div align=center>
 <img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >
-**MAPS is a modality-agnostic computational package that integrates ultrafast cross-modal alignment, unpaired/paired multimodal integration, and interactive 3D exploration for spatial omics data.**  
-  
----
 
+**MAPS is a modality-agnostic computational package that integrates ultrafast cross-modal alignment, unpaired/paired multimodal integration, and interactive 3D exploration for spatial omics data.**  
+---
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
 [![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://maps-tools.readthedocs.io/en/latest/)
 [![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/forks)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
+
+</div>
+
 
 ## Installation via Github
 #### 📥 Download
