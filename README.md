@@ -2,7 +2,8 @@
 <img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >
 <font size="3">
   A modality-agnostic package that integrates ultrafast cross-modal alignment, unpaired/paired multimodal integration, and interactive 3D exploration for spatial omics
-</font> 
+</font>  
+  
 ---
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
