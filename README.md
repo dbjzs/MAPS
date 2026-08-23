@@ -1,5 +1,5 @@
 <div align=center>
-<img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="300"  alt="MAPS-logo" >
+<img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >
 </div>
 
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
