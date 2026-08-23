@@ -1,6 +1,7 @@
 <div align=center>
 <img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="200"  alt="MAPS-logo" >
 </div>
+MAPS, a modality-agnostic platform for spatial biology comprising MAPS-alignment for ultrafast alignment of any modality, MAPS-integration for unpaired cross-modal integration across orthogonal modalities and paired 3D multimodal reconstruction, and MAPS-Explorer for large-scale interactive 3D analysis.
 
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
