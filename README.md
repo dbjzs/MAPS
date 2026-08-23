@@ -8,7 +8,7 @@
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
 
 </div>
-MAPS is a modality-agnostic package that integrates ultrafast cross-modal alignment, unpaired diagonal integration, paired 3D multimodal integration, and interactive 3D exploration for spatial omics data.
+MAPS is a modality-agnostic package that integrates ultrafast cross-modal alignment, unpaired diagonal integration across orthogonal modalities, paired 3D multimodal reconstruction, and interactive 3D exploration for spatial omics data.
 
 ## Installation via Github
 #### 📥 Download
