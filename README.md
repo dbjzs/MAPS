@@ -7,7 +7,7 @@
 [![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/forks)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
 
---
+---
 </div>
 
 MAPS is a modality-agnostic computing platform that unifies physical and molecular coordinates systems across arbitrary modalities, enabling ultrafast cross-modal alignment, unpaired diagonal integration across orthogonal modalities, paired 3D multimodal reconstruction, and 3D interactive exploration for spatial omics data.
