@@ -41,9 +41,9 @@ pip install .
 ```
 @article{,
   title = {},
-  author = {Dai, et al.},
+  author = {Dai, Yan, Wang, Liang,....Yuan* et al.},
   year = {2026},
-  journal = {bioRxiv : the preprint server for biology},
+  journal = {bioRxiv : Unifying physical and molecular coordinates systems across modalities in spatial biology},
   eprint = {},
   doi = {},
 }
