@@ -47,6 +47,13 @@ conda activate MAPS
 pip install mapspatial
 ```
 
+## Jupyter Tutorial
+```
+pip install ipykernel
+python -m ipykernel install --user --name=MAPS --display-name="Python (MAPS)" 
+```
+Please use the core name as follows:"Python [conda env:MAPS]"
+
 ### 📁 Tutorial h5ad file
 - All h5ad files have been uploaded to the [zenodo repository]()
   
