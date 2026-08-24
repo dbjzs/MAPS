@@ -59,7 +59,7 @@ pip install mapspatial
   pip install ipykernel
   python -m ipykernel install --user --name=MAPS --display-name="Python (MAPS)" 
   ```
-  Please use the core name as follows:"Python [conda env:MAPS]"
+  Please use the core name as follows:```Python [conda env:MAPS]```
 
 ### Reference
 - If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv]().
