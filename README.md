@@ -47,20 +47,19 @@ conda activate MAPS
 pip install mapspatial
 ```
 
-## Jupyter Tutorial
-```
-pip install ipykernel
-python -m ipykernel install --user --name=MAPS --display-name="Python (MAPS)" 
-```
-Please use the core name as follows:"Python [conda env:MAPS]"
-
 ### 📁 Tutorial h5ad file
 - All h5ad files have been uploaded to the [zenodo repository]()
   
 ### 🚀Getting started Tutorial
 - Jupyter tutorials and API documentation are available at [Tutorial](https://maps-tools.readthedocs.io/en/latest/).
 - The expected data input format of MAPS is [AnnData](https://anndata.readthedocs.io/en/stable/) object.
-- Please use [issues](https://github.com/dbjzs/MAPS/issues) to submit bug reports.  
+- Please use [issues](https://github.com/dbjzs/MAPS/issues) to submit bug reports.
+- Jupyter Tutorial
+  ```
+  pip install ipykernel
+  python -m ipykernel install --user --name=MAPS --display-name="Python (MAPS)" 
+  ```
+  Please use the core name as follows:"Python [conda env:MAPS]"
 
 ### Reference
 - If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv]().
