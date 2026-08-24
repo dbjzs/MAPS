@@ -5,6 +5,8 @@
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
 [![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://maps-tools.readthedocs.io/en/latest/)
 [![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/forks)
+[![PyPI Install](https://img.shields.io/pepy/dt/mapspatial?logo=pypi&label=%20Installation)](https://pepy.tech/project/mapspatial)
+[![PyPI - Version](https://img.shields.io/pypi/v/mapspatial?logo=pypi)](https://pypi.org/project/mapspatial/)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
 
 ---
