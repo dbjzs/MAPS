@@ -9,6 +9,7 @@
 [![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://maps-tools.readthedocs.io/en/latest/)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
 [![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Zenodo%20Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/18483604)](https://zenodo.org/record/19439411)
+
 ---
 </div>
 
