@@ -26,7 +26,7 @@ conda create -n MAPS -c conda-forge python==3.10.13 libopenblas=0.3.25 -y
 conda activate MAPS
 ```
 #### 🛠️package
-* Then using pip install MAPS.
+* Then using pip local install MAPS.
 ```
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install .
@@ -35,13 +35,17 @@ pip install .
 ## Installation via PyPi
 #### 🔧 environment and 🛠️package
 MAPS is available for Python 3.10. We recommend to train MAPS models on a device with GPU support.  
-* Using the conda install environment and using pip install MAPS.
+* Using the conda install environment
 ```
 conda create -n MAPS -c conda-forge python==3.10.13 libopenblas=0.3.25 -y
 conda activate MAPS
-pip install mapspatial
 ```
 
+#### 🛠️package
+* Then using pip install MAPS.
+```
+pip install mapspatial
+```
 
 ### 📁 Tutorial h5ad file
 - All h5ad files have been uploaded to the [zenodo repository]()
