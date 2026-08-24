@@ -33,7 +33,7 @@ pip install .
 ```
 
 ## Installation via PyPi
-#### 🔧 environment and 🛠️package
+#### 🔧 environment
 MAPS is available for Python 3.10. We recommend to train MAPS models on a device with GPU support.  
 * Using the conda install environment
 ```
