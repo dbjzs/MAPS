@@ -8,7 +8,7 @@
 [![PyPI Install](https://img.shields.io/pepy/dt/mapspatial?logo=pypi&label=%20Installation)](https://pepy.tech/project/mapspatial)
 [![PyPI - Version](https://img.shields.io/pypi/v/mapspatial?logo=pypi)](https://pypi.org/project/mapspatial/)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
-[![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/18483604)](https://zenodo.org/record/19439411)
+[![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Zenodo%Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/18483604)](https://zenodo.org/record/19439411)
 ---
 </div>
 
