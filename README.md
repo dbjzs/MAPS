@@ -64,6 +64,11 @@ pip install mapspatial
   ```
   Please use the core name as follows:```Python [conda env:MAPS]```
 
+### 💻MAPS-Explorer
+- 3D interactive exploration website is available at [MAPS-Explorer](https://bioinfor.imu.edu.cn/maps-explorer/).
+- 3D analysis tutorial
+
+
 ### Reference
 - If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv]().
 
