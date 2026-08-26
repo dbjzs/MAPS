@@ -71,9 +71,9 @@ pip install mapspatial
 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
   <!-- 左侧：三个GIF -->
   <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <img src="https://raw.githubusercontent.com/dbjzs/MAPS/main/3D.gif" width="150" alt="3D">
-    <img src="https://raw.githubusercontent.com/dbjzs/MAPS/main/Y.gif" width="150" alt="Y">
-    <img src="https://raw.githubusercontent.com/dbjzs/MAPS/main/Z.gif" width="150" alt="Z">
+    <img src="https://raw.github/dbjzs/MAPS/main/3D.gif" width="150" alt="3D">
+    <img src="https://raw.github/dbjzs/MAPS/main/Y.gif" width="150" alt="Y">
+    <img src="https://raw.github/dbjzs/MAPS/main/Z.gif" width="150" alt="Z">
   </div>
   <!-- 右侧：文字 -->
   <div style="display: flex; flex-direction: column; gap: 5px; font-size: 16px; flex: 1; min-width: 200px;">
