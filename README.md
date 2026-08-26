@@ -13,8 +13,6 @@
 ---
 </div>
 
-[Installation](https://mapspatial.readthedocs.io/en/latest/installation.html) - [Tutorials](https://mapspatial.readthedocs.io/en/latest/notebooks/tutorials/index.html) - [💻MAPS-Explorer](https://bioinfor.imu.edu.cn/maps-explorer/)
-
 MAPS is a modality-agnostic spatial omics computing platform that unifies physical and molecular coordinates systems across arbitrary modalities, enabling ultrafast cross-modal alignment, unpaired diagonal integration across orthogonal modalities, paired 3D multimodal reconstruction, and 3D interactive exploration.
 
 ## Installation via Github
