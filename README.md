@@ -8,7 +8,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/mapspatial?logo=pypi)](https://pypi.org/project/mapspatial/)
 [![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://mapspatial.readthedocs.io/en/latest/)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
-[![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Zenodo%20Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/22100091)](https://zenodo.org/records/22100091)
+[![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Zenodo%20Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/22100091)]()
 
 ---
 </div>
