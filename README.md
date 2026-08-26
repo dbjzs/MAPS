@@ -6,7 +6,7 @@
 [![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/forks)
 [![PyPI Install](https://img.shields.io/pepy/dt/mapspatial?logo=pypi&label=%20Installation)](https://pepy.tech/project/mapspatial)
 [![PyPI - Version](https://img.shields.io/pypi/v/mapspatial?logo=pypi)](https://pypi.org/project/mapspatial/)
-[![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://maps-tools.readthedocs.io/en/latest/)
+[![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://mapspatial.readthedocs.io/en/latest/)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
 [![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Zenodo%20Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/22100091)]()
 
@@ -54,7 +54,7 @@ pip install mapspatial
 - All h5ad files have been uploaded to the [zenodo repository](https://zenodo.org/records/22100091)
   
 ### 🚀Getting started Tutorial
-- Jupyter tutorials and API documentation are available at [Tutorial](https://maps-tools.readthedocs.io/en/latest/).
+- Jupyter tutorials and API documentation are available at [Tutorial](https://mapspatial.readthedocs.io/en/latest/).
 - The expected data input format of MAPS is [AnnData](https://anndata.readthedocs.io/en/stable/) object.
 - Please use [issues](https://github.com/dbjzs/MAPS/issues) to submit bug reports.
 - Jupyter Tutorial
