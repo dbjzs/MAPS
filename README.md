@@ -3,9 +3,12 @@
   
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
-[![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://maps-tools.readthedocs.io/en/latest/)
 [![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/forks)
+[![PyPI Install](https://img.shields.io/pepy/dt/mapspatial?logo=pypi&label=%20Installation)](https://pepy.tech/project/mapspatial)
+[![PyPI - Version](https://img.shields.io/pypi/v/mapspatial?logo=pypi)](https://pypi.org/project/mapspatial/)
+[![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://mapspatial.readthedocs.io/en/latest/)
 ![Python 3.10.13](https://img.shields.io/badge/python->=3.10-blue.svg)
+[![All Versions Unique Downloads](https://img.shields.io/badge/dynamic/json?color=blue&label=Zenodo%20Data%20Downloads&query=$.stats.unique_downloads&url=https://zenodo.org/api/records/22100091)](https://zenodo.org/records/22100091)
 
 ---
 </div>
@@ -26,18 +29,49 @@ conda create -n MAPS -c conda-forge python==3.10.13 libopenblas=0.3.25 -y
 conda activate MAPS
 ```
 #### 🛠️package
-* Then using pip install MAPS.
+* Then using pip local install MAPS.
 ```
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install .
 ```
-### 📁 Tutorial h5ad file
-- All h5ad files have been uploaded to the [zenodo repository]()
+
+## Installation via PyPi
+#### 🔧 environment
+MAPS is available for Python 3.10. We recommend to train MAPS models on a device with GPU support.  
+* Using the conda install environment
+```
+conda create -n MAPS -c conda-forge python==3.10.13 libopenblas=0.3.25 -y
+conda activate MAPS
+```
+
+#### 🛠️package
+* Then using pip install MAPS.
+```
+pip install mapspatial
+```
+
+## 📁 Tutorial h5ad file
+- All h5ad files have been uploaded to the [zenodo repository](https://zenodo.org/records/22100091)
   
-### 🚀Getting started Tutorial
-- Jupyter tutorials and API documentation are available at [Tutorial](https://maps-tools.readthedocs.io/en/latest/).
+## 🚀Getting started Tutorial
+- Jupyter tutorials and API documentation are available at [Tutorial](https://mapspatial.readthedocs.io/en/latest/).
 - The expected data input format of MAPS is [AnnData](https://anndata.readthedocs.io/en/stable/) object.
-- Please use [issues](https://github.com/dbjzs/MAPS/issues) to submit bug reports.  
+- Please use [issues](https://github.com/dbjzs/MAPS/issues) to submit bug reports.
+- Jupyter Tutorial
+  ```
+  pip install ipykernel
+  python -m ipykernel install --user --name=MAPS --display-name="Python (MAPS)" 
+  ```
+  Please use the core name as follows:```Python [conda env:MAPS]```
+
+
+
+## 💻MAPS-Explorer
+  
+- 3D interactive exploration website is available at [MAPS-Explorer](https://bioinfor.imu.edu.cn/maps-explorer/).  
+- 3D analysis tutorial [3D analysis](https://mapspatial.readthedocs.io/en/latest/).
+  
+
 
 ### Reference
 - If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv]().
