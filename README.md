@@ -69,9 +69,10 @@ pip install mapspatial
 
 💻MAPS-Explorer
   
-</div>
 - 3D interactive exploration website is available at [MAPS-Explorer](https://bioinfor.imu.edu.cn/maps-explorer/).  
 - 3D analysis tutorial [3D analysis](https://mapspatial.readthedocs.io/en/latest/).
+  
+</div>
 
 
 ### Reference
