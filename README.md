@@ -67,16 +67,18 @@ pip install mapspatial
 
 
 ## 💻MAPS-Explorer
-  
-<div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-  <!-- 左侧：三个GIF -->
+- 3D interactive exploration website is available at [MAPS-Explorer](https://bioinfor.imu.edu.cn/maps-explorer/).  
+- 3D analysis tutorial [3D analysis](https://mapspatial.readthedocs.io/en/latest/).
+<div style="display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+  <!-- 左侧：三个 GIF 并排显示 -->
   <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <img src="https://raw.github/dbjzs/MAPS/main/3D.gif" width="150" alt="3D">
-    <img src="https://raw.github/dbjzs/MAPS/main/Y.gif" width="150" alt="Y">
-    <img src="https://raw.github/dbjzs/MAPS/main/Z.gif" width="150" alt="Z">
+    <img src="https://github.com/dbjzs/MAPS/blob/main/3D.gif" width="150" alt="3D">
+    <img src="https://github.com/dbjzs/MAPS/blob/main/Y.gif" width="150" alt="Y">
+    <img src="https://github.com/dbjzs/MAPS/blob/main/Z.gif" width="150" alt="Z">
   </div>
-  <!-- 右侧：文字 -->
-  <div style="display: flex; flex-direction: column; gap: 5px; font-size: 16px; flex: 1; min-width: 200px;">
+  
+  <!-- 右侧：两行文字（带超链接） -->
+  <div style="display: flex; flex-direction: column; gap: 8px; font-size: 16px; flex: 1; min-width: 200px;">
     <div>• 3D interactive exploration website is available at <a href="https://bioinfor.imu.edu.cn/maps-explorer/">MAPS-Explorer</a>.</div>
     <div>• 3D analysis tutorial <a href="https://mapspatial.readthedocs.io/en/latest/">3D analysis</a>.</div>
   </div>
