@@ -73,7 +73,7 @@ pip install mapspatial
   <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/palette.gif" width="200" alt="3D">
   <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/Y.gif" width="200" alt="Y">
   <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/Z.gif" width="200" alt="Z">
-  <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/palette.gif" width="200" alt="Z">
+  <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/density.gif" width="200" alt="density">
 </div>
 
 
