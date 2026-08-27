@@ -1,5 +1,5 @@
 <div align=center>
-<img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/Logo.jpg" width="150"  alt="MAPS-logo" >  
+<img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/logo.jpg" width="150"  alt="MAPS-logo" >  
   
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
