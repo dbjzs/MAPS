@@ -1,5 +1,5 @@
 <div align=center>
-<img src="https://github.com/dbjzs/MAPS/blob/main/Logo.jpg" width="150"  alt="MAPS-logo" >  
+<img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/Logo.jpg" width="150"  alt="MAPS-logo" >  
   
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
@@ -70,9 +70,9 @@ pip install mapspatial
 - 3D interactive exploration website is available at [MAPS-Explorer](https://bioinfor.imu.edu.cn/maps-explorer/).  
 - 3D analysis tutorial [3D analysis](https://mapspatial.readthedocs.io/en/latest/).
 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-  <img src="https://github.com/dbjzs/MAPS/blob/main/3D.gif" width="200" alt="3D">
-  <img src="https://github.com/dbjzs/MAPS/blob/main/Y.gif" width="200" alt="Y">
-  <img src="https://github.com/dbjzs/MAPS/blob/main/Z.gif" width="200" alt="Z">
+  <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/3D.gif" width="200" alt="3D">
+  <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/Y.gif" width="200" alt="Y">
+  <img src="https://github.com/dbjzs/MAPS/blob/main/LOGO/Z.gif" width="200" alt="Z">
 </div>
 
 
