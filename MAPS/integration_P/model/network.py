@@ -119,10 +119,11 @@ class GradientReversalLayer(nn.Module):
     def forward(self, x, lambda_=1.0):
         return GradientReversalFunction.apply(x, lambda_)
 
-class Network(nn.Module):
-    def __init__(self, omics1_size, omics2_size, noise_rate=0.2, dropout_rate=0.1):
-        super(Network, self).__init__()
+class Network_multi_omics(nn.Module):
+    def __init__(self, omics1_size, omics2_size, input_dimension, noise_rate=0.2, dropout_rate=0.1):
+        super(Network_multi_omics, self).__init__()
 
+        self.input_dimension = input_dimension
         self.fea_size = 256
         self.num_heads = 4
         self.omics1_size, self.omics2_size = omics1_size, omics2_size
@@ -130,8 +131,8 @@ class Network(nn.Module):
         self.noise_dropout = nn.Dropout(noise_rate)
 
         # Encoder initialization
-        self.net_lat1 = nn.Sequential(MLP(1024, 512), MLP(512, 512))
-        self.net_lat2 = nn.Sequential(MLP(1024, 512), MLP(512, 256))
+        self.net_lat1 = nn.Sequential(MLP(self.input_dimension//2, 512), MLP(512, 512))
+        self.net_lat2 = nn.Sequential(MLP(self.input_dimension//2, 512), MLP(512, 256))
 
         self.net_lat_omics1 = MLP(256+512, self.fea_size)
         self.net_lat_omics2 = MLP(256+512, self.fea_size)
@@ -183,15 +184,16 @@ class Network(nn.Module):
         ########################### stage 1: Encode
         b = img.shape[0]
         img = self.noise_dropout(img)
-        f = torch.cat([self.net_lat2(img[:, 0:1024]), self.net_lat1(img[:, 1024:])], dim=1)
+
+        f = torch.cat([self.net_lat2(img[:, 0:self.input_dimension//2]), self.net_lat1(img[:, self.input_dimension//2:self.input_dimension])], dim=1)
 
         f1, f2 = self.extraction(f)
 
         # breakpoint()
         ############################
         # Domain Classifier 1
-        f_reverse1 = self.grl1(f.view(b, -1), lambda_=1.0)  # Apply gradient reversal
-        y_domain1 = self.domain_classifier1(f_reverse1)
+        # f_reverse1 = self.grl1(f.view(b, -1), lambda_=1.0)  # Apply gradient reversal
+        # y_domain1 = self.domain_classifier1(f_reverse1)
         ############################
 
         f = torch.stack([f1, f2], dim=1)
@@ -205,8 +207,8 @@ class Network(nn.Module):
 
         ############################
         # Domain Classifier 2
-        f_reverse2 = self.grl2(f_.view(b, -1), lambda_=1.0)  # Apply gradient reversal
-        y_domain2 = self.domain_classifier2(f_reverse2)
+        # f_reverse2 = self.grl2(f_.view(b, -1), lambda_=1.0)  # Apply gradient reversal
+        # y_domain2 = self.domain_classifier2(f_reverse2)
         ############################
 
         f_overal = self.recalibrate_layers(f_)
@@ -216,4 +218,84 @@ class Network(nn.Module):
         omics1, omics2 = self.omics12[:, :self.omics1_size, :], self.omics12[:, self.omics1_size: , :]
         st2_omics1, st2_omics2 = f1@omics1.squeeze().T, f2@omics2.squeeze().T
 
-        return st2_omics1, st2_omics2, (y_domain1+y_domain2)/2, f_.view(b, -1)
+        return st2_omics1, st2_omics2, 
+
+
+class Network_single_omics(nn.Module):
+    def __init__(self, omics_size, input_dimension, noise_rate=0.2, dropout_rate=0.1):
+        super(Network_single_omics, self).__init__()
+
+        self.input_dimension = input_dimension
+        self.fea_size = 256
+        self.num_heads = 4
+        self.omics_size = omics_size
+
+        self.noise_dropout = nn.Dropout(noise_rate)
+
+        # Encoder initialization
+        self.net_lat1 = nn.Sequential(MLP(input_dimension//2, 512), MLP(512, 512))
+        self.net_lat2 = nn.Sequential(MLP(input_dimension//2, 512), MLP(512, 256))
+
+        self.net_lat_omics1 = MLP(256+512, self.fea_size)
+
+        ########################
+        # Token initialization
+        self.omics = nn.Parameter(torch.randn((1, self.omics_size, self.fea_size), requires_grad=True))
+        trunc_normal_(self.omics, mean=0.0, std=.02)
+
+        ########################
+        # Transformers
+        self.trans_omics1 = Transformer(fea_size=self.fea_size, num_heads=self.num_heads, dropout_rate=dropout_rate)
+        self.trans_omics2 = Transformer(fea_size=self.fea_size, num_heads=self.num_heads, dropout_rate=dropout_rate)
+
+        self.trans_cross1 = Transformer_Cross(fea_size=self.fea_size, num_heads=self.num_heads, dropout_rate=dropout_rate)
+        self.trans_cross2 = Transformer_Cross(fea_size=self.fea_size, num_heads=self.num_heads, dropout_rate=dropout_rate)
+        
+        ########################
+        # Others initialization
+        self.dropout = nn.Dropout(dropout_rate)
+
+        self.recalibrate_layers = nn.Sequential(nn.Linear(self.fea_size, self.fea_size), 
+                                                # nn.BatchNorm1d(3),
+                                                nn.LeakyReLU(0.1, inplace=True))
+
+        #########################
+        # Domain classifier initialization
+        self.domain_classifier1 = nn.Sequential(nn.Linear(self.fea_size*3, self.fea_size), 
+                                                nn.LeakyReLU(0.1, inplace=True), 
+                                                nn.Linear(self.fea_size, 3, bias=False))
+        self.grl1 = GradientReversalLayer()
+
+        self.domain_classifier2 = nn.Sequential(nn.Linear(self.fea_size*2, self.fea_size),
+                                                nn.LeakyReLU(0.1, inplace=True),
+                                                nn.Linear(self.fea_size, 3, bias=False))
+        self.grl2 = GradientReversalLayer()
+        
+    def extraction(self, x):
+        f1 = self.net_lat_omics1(x)
+        return f1
+    
+
+    def forward(self, img):
+
+        ########################### stage 1: Encode
+        b = img.shape[0]
+        img = self.noise_dropout(img)
+        f = torch.cat([self.net_lat2(img[:, 0:self.input_dimension//2]), self.net_lat1(img[:, self.input_dimension//2:self.input_dimension])], dim=1)
+
+        f = self.extraction(f)[:, None, :]
+
+        omics = self.omics.expand(b, -1, -1)
+        f_ = self.trans_cross1(f, omics) + f
+        f_ = self.trans_omics1(f_) + f
+
+        f_ = self.trans_cross2(f_, omics) + f
+        f_ = self.trans_omics2(f_) + f
+
+
+        f_overal = self.recalibrate_layers(f_)
+        f1 = self.dropout(f_overal).squeeze()
+
+        st2_omics = f1@self.omics.squeeze().T
+
+        return st2_omics

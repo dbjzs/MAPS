@@ -19,7 +19,7 @@ def read_image(img_path):
     return img
 
 
-class liver_loader(Dataset):
+class single_omics_loader(Dataset):
     def __init__(self, dataset, transform=None):
         self.dataset = dataset
         # self.transform = transform
@@ -28,10 +28,29 @@ class liver_loader(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, index):
-        fea, rna_omics, protein, slide_id, cell_id = self.dataset[index]
+        omics, fea, slide_id, cell_id = self.dataset[index]
 
-        rna_omics = torch.Tensor(rna_omics)
-        protein = torch.Tensor(protein)
+        omics = torch.Tensor(omics)
+        fea = torch.Tensor(fea)
 
         # return img, fea, rna, protein, key
-        return fea, rna_omics, protein, slide_id, cell_id
+        return fea, omics, slide_id, cell_id
+
+
+class multi_omics_loader(Dataset):
+    def __init__(self, dataset, transform=None):
+        self.dataset = dataset
+        # self.transform = transform
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, index):
+        omics1, omics2, fea, slide_id, cell_id = self.dataset[index]
+
+        omics1 = torch.Tensor(omics1)
+        omics2 = torch.Tensor(omics2)
+        fea = torch.Tensor(fea)
+
+        # return img, fea, rna, protein, key
+        return fea, omics1, omics2, slide_id, cell_id
