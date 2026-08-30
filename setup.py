@@ -18,7 +18,7 @@ package_dir = {
 
 setup(
     name='MAPS',
-    version='1.0',
+    version='0.1.2',
     url='https://github.com/dbjzs/MAPS',
     author='Bingjie Dai',
     author_email='17516970902@163.com',
