@@ -3,7 +3,7 @@
   
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/dbjzs/MAPS/blob/main/LICENSE)
 [![Stars](https://badgen.net/github/stars/dbjzs/MAPS?icon=github&color=yellow)](https://github.com/dbjzs/MAPS/stargazers)
-[![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow)](https://github.com/dbjzs/MAPS/forks)
+[![Forks](https://img.shields.io/github/forks/dbjzs/MAPS?logo=GitHub&color=yellow&cacheSeconds=3600)](https://github.com/dbjzs/MAPS/forks)
 [![PyPI Install](https://img.shields.io/pepy/dt/mapspatial?logo=pypi&label=%20Installation)](https://pepy.tech/project/mapspatial)
 [![PyPI - Version](https://img.shields.io/pypi/v/mapspatial?logo=pypi)](https://pypi.org/project/mapspatial/)
 [![Docs](https://readthedocs.org/projects/MAPS/badge/?version=latest)](https://mapspatial.readthedocs.io/en/latest/)
