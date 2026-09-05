@@ -79,7 +79,7 @@ pip install mapspatial
 
 
 ### Reference
-- If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv]().
+- If you find MAPS useful for your research, please consider citing the MAPS manuscript [bioRxiv](https://www.biorxiv.org/content/10.64898/2026.09.01.748536v1).
 
 ```
 @article{,
@@ -87,7 +87,7 @@ pip install mapspatial
   author = {Dai, Yan, Wang*, Liang,....Zuo*, Qian*, Yuan* et al.},
   year = {2026},
   journal = {bioRxiv : Unifying physical and molecular coordinates systems across modalities in spatial biology},
-  eprint = {},
+  eprint = {https://www.biorxiv.org/content/10.64898/2026.09.01.748536v1},
   doi = {},
 }
 ```
