@@ -89,6 +89,6 @@ pip install mapspatial
   year = {2026},
   journal = {bioRxiv : Unifying physical and molecular coordinates systems across modalities in spatial biology},
   eprint = {https://www.biorxiv.org/content/10.64898/2026.09.01.748536v1},
-  doi = {},
+  doi = {https://doi.org/10.64898/2026.09.01.748536},
 }
 ```
