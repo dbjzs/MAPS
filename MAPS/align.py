@@ -150,8 +150,8 @@ def Rigid_alignment(source, target, epochs=2000, sample_size=20000, lr_rot=0.01,
     theta_deg = theta.item() * 180 / np.pi
     translation_np = translation.squeeze().detach().cpu().numpy()
     final_scale_np = scale.item() if enable_scale else 1.0
-    
-    GPU_peak_memory = torch.cuda.max_memory_allocated(device) / (1024 ** 3)
+
+    GPU_peak_memory = torch.cuda.max_memory_reserved(device) / (1024 ** 3)
     
     print(f"Peak GPU memory usage: {GPU_peak_memory:.3f} GB")
     print(f"Scale factor: {final_scale_np:.3f}, Rotation angle: {theta_deg - 360 if theta_deg > 180 else theta_deg:.2f}°, Translation (x, y): ({translation_np[0]:.2f}, {translation_np[1]:.2f})")
@@ -571,7 +571,7 @@ def Rigid_alignment_atlas(source, target, epochs=2000, sample_size=20000, lr_rot
     translation_np = translation.squeeze().detach().cpu().numpy()
     final_scale_np = scale.item() if enable_scale else 1.0
     
-    GPU_peak_memory = torch.cuda.max_memory_allocated(device) / (1024 ** 3)
+    GPU_peak_memory = torch.cuda.max_memory_reserved(device) / (1024 ** 3)
     return aligned_np, theta_deg, translation_np, final_scale_np, final_loss
 
 
